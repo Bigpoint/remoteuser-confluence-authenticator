@@ -1,0 +1,21 @@
+target
+test-output
+classes
+*.versionsBackup
+
+# intellij
+*.iml
+*.ipr
+*.iws
+*.log
+.idea/
+
+# eclipse
+.project
+.metadata
+.classpath
+.settings/
+.loadpath
+.springBeans
+bin
+.DS_Store

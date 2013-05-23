@@ -1,4 +1,4 @@
-package com.atlassian.confluence.ex;
+package net.bigpoint.atlassian.confluence;
 
 import com.atlassian.confluence.user.ConfluenceAuthenticator;
 
