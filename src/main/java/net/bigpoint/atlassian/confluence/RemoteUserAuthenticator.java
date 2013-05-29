@@ -36,12 +36,12 @@ public class RemoteUserAuthenticator extends ConfluenceAuthenticator {
         // This works but sucks, hopefully we will learn how to fix this.
         // This would be what we actually want to do but the result will always be null for unknown reasons:
 
-        //String remoteUser = request.getRemoteUser();
-        //log.warn("request.getRemoteUser() = " + remoteUser );
+        // String remoteUser = request.getRemoteUser();
+        log.warn("request.getRemoteUser() = " + request.getRemoteUser() );
 
         // And here is our workaround.
         String remoteUser = request.getHeader("remote_user");
-        log.info("request.getHeader(\"remote_user\") = " + remoteUser);
+        log.warn("request.getHeader(\"remote_user\") = " + remoteUser);
 
         // Still null? just return it. Confluence will consider this as anonymous and redirect to login dialog
         // in case anonymous has no permissions.
