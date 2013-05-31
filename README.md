@@ -13,12 +13,10 @@ Installation
 
 We use Apache as reverse proxy in this case. We ended up with the following vhost snippet:
 
-'''
-RewriteEngine On
-RewriteCond %{LA-U:REMOTE_USER} (.+)
-RewriteRule . - [E=RU:%1]
-RequestHeader set REMOTE_USER "%{RU}e" env=RU
-'''
+    RewriteEngine On
+    RewriteCond %{LA-U:REMOTE_USER} (.+)
+    RewriteRule . - [E=RU:%1]
+    RequestHeader set REMOTE_USER "%{RU}e" env=RU
 
 It did not work in any way within our setup to use request.getRemoteUser(), so we decided to explicitly read the remote_user header.
 There were some hints but everything we tried turned out to fail. So if you have a better idea, go ahead.
