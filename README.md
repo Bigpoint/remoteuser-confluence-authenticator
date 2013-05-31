@@ -9,7 +9,8 @@ Installation
 
 1. Compile
 2. Put the rsulting jar in your confluence/WEB-INF/lib folder
-3. Edit seraph-config.xml in confluence/WEB-INF/classes to use this authenticator instead of the standard one: '<authenticator class="net.bigpoint.atlassian.confluence.RemoteUserAuthenticator"/>'
+3. Edit seraph-config.xml in confluence/WEB-INF/classes to use this authenticator instead of the standard one:
+    <authenticator class="net.bigpoint.atlassian.confluence.RemoteUserAuthenticator"/>
 
 We use Apache as reverse proxy in this case. We ended up with the following vhost snippet:
 
