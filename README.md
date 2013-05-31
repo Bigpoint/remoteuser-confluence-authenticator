@@ -7,12 +7,9 @@ We assume that we can read a remote_user header written by that reverse proxy in
 Installation
 ============
 
-# Compile
-# Put the rsulting jar in your confluence/WEB-INF/lib folder
-# Edit seraph-config.xml in confluence/WEB-INF/classes to use this authenticator instead of the standard one: '<authenticator class="net.bigpoint.atlassian.confluence.RemoteUserAuthenticator"/>'
-
-Usage
-=====
+1. Compile
+2. Put the rsulting jar in your confluence/WEB-INF/lib folder
+3. Edit seraph-config.xml in confluence/WEB-INF/classes to use this authenticator instead of the standard one: '<authenticator class="net.bigpoint.atlassian.confluence.RemoteUserAuthenticator"/>'
 
 We use Apache as reverse proxy in this case. We ended up with the following vhost snippet:
 
@@ -35,7 +32,7 @@ Find that great project in Bitbucket: https://bitbucket.org/mryall/confluence-si
 License and Author
 ==================
 
-Author:: Nils Hofmeister nhofmeister@bigpoint.net
+Author: Nils Hofmeister nhofmeister@bigpoint.net
 
 Copyright 2013, Bigpoint GmbH
 
