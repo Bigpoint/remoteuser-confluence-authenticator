@@ -4,6 +4,8 @@ remoteuser-confluence-authenticator
 Custom authenticator for confluence providing usage of remote_user variable. We use this as an easy way to utilize a reverse proxy for authentication.
 We assume that we can read a remote_user header written by that reverse proxy in order to propagate the user name of the authenticated user.
 
+[![Build Status](https://api.travis-ci.org/Bigpoint/remoteuser-confluence-authenticator.png?branch=master)](https://travis-ci.org/Bigpoint/remoteuser-confluence-authenticator)
+
 Installation
 ============
 
