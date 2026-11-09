@@ -6,6 +6,23 @@ We assume that we can read a remote_user header written by that reverse proxy in
 
 [![Build Status](https://api.travis-ci.org/Bigpoint/remoteuser-confluence-authenticator.png?branch=master)](https://travis-ci.org/Bigpoint/remoteuser-confluence-authenticator)
 
+Confluence 10 Compatibility
+===========================
+
+Updated the original Bigpoint authenticator for compatibility with Atlassian Confluence Data Center 10.2.19.
+
+Changes
+
+- Migrated from javax.servlet to jakarta.servlet.
+
+- Updated authentication handling for the Confluence 10 and Seraph 5 APIs.
+
+- Preserved Kerberos SSO integration through the remote_user header.
+
+- Updated unit tests for Jakarta compatibility.
+
+Note: Authentication and session handling must be validated before production deployment.
+
 Installation
 ============
 
@@ -35,7 +52,14 @@ Find that great project in Bitbucket: https://bitbucket.org/mryall/confluence-si
 License and Author
 ==================
 
-Author: Nils Hofmeister nhofmeister@bigpoint.net
+Original Author
+-  Nils Hofmeister nhofmeister@bigpoint.net
+
+Contributor
+
+- D'Ante Barnes — Confluence 10 compatibility updates, Jakarta migration, and authentication improvements (2026)
+
+
 
 Copyright 2013, Bigpoint GmbH
 

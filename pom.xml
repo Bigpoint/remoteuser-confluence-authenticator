@@ -14,8 +14,9 @@
     </description>
 
     <properties>
-        <confluence.version>5.1.3</confluence.version>
-        <testng.version>6.3.1</testng.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <confluence.version>10.2.19</confluence.version>
+        <testng.version>21</testng.version>
     </properties>
 
 	<build>
@@ -23,11 +24,10 @@
 	    	<plugin>
 	      		<groupId>org.apache.maven.plugins</groupId>
 	      		<artifactId>maven-compiler-plugin</artifactId>
-	      		<version>2.3.2</version>
-	       		<configuration>
-	        		<source>1.5</source>
-	        		<target>1.5</target>
-	       		</configuration>
+	      		<version>3.14.1</version>
+                <configuration>
+                    <release>21</release>
+                </configuration>
 	    	</plugin>
 	  	</plugins>
 	</build>
@@ -39,16 +39,72 @@
             <version>${confluence.version}</version>
             <scope>provided</scope>
         </dependency>
+        <!-- Jakarta Servlet API used by Confluence 10 -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Logging used by the authenticator -->
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.3.5</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Seraph authentication framework used by Confluence -->
+        <dependency>
+            <groupId>com.atlassian.seraph</groupId>
+            <artifactId>atlassian-seraph</artifactId>
+            <version>5.0.7</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Atlassian user interfaces required by Confluence authentication -->
+        <dependency>
+            <groupId>com.atlassian.user</groupId>
+            <artifactId>atlassian-user</artifactId>
+            <version>3.0.3</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Crowd API required by Confluence authentication -->
+        <dependency>
+            <groupId>com.atlassian.crowd</groupId>
+            <artifactId>embedded-crowd-api</artifactId>
+            <version>7.1.6</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Logging API required by Atlassian Seraph -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.17</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Atlassian Event API required by Confluence -->
+        <dependency>
+            <groupId>com.atlassian.event</groupId>
+            <artifactId>atlassian-event</artifactId>
+            <version>6.0.9</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Atlassian SAL API required by ConfluenceUser -->
+        <dependency>
+            <groupId>com.atlassian.sal</groupId>
+            <artifactId>sal-api</artifactId>
+            <version>7.0.8</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.8.2</version>
+            <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.8.5</version>
+            <artifactId>mockito-core</artifactId>
+            <version>5.18.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -74,4 +130,3 @@
     </repositories>
 
 </project>
-
