@@ -2,8 +2,10 @@
 package net.bigpoint.atlassian.confluence;
 
 import com.atlassian.confluence.user.ConfluenceUser;
+import com.atlassian.seraph.auth.DefaultAuthenticator;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -148,5 +150,30 @@ public class RemoteUserAuthenticatorTest {
         Principal principal = authenticator.getUser(request, response);
 
         assertNull(principal);
+    }
+    @Test
+    public void shouldPreserveImpersonatedSession() {
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+
+        Principal impersonatedUser = () -> "test.user";
+
+        // Apache continues identifying the original administrator.
+        when(request.getHeader("remote_user"))
+                .thenReturn("admin.user");
+
+        RemoteUserAuthenticator authenticator =
+                spy(new RemoteUserAuthenticator());
+
+        // Simulate an existing impersonated Confluence session.
+        doReturn(impersonatedUser)
+                .when(authenticator)
+                .resolveSessionUser(request);
+
+        Principal result = authenticator.getUser(request, response);
+
+        assertNotNull(result);
+        assertEquals("test.user", result.getName());
     }
 }
