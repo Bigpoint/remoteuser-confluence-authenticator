@@ -1,4 +1,3 @@
-
 package net.bigpoint.atlassian.confluence;
 
 import com.atlassian.confluence.user.ConfluenceAuthenticator;
@@ -23,8 +22,12 @@ import org.apache.commons.logging.LogFactory;
  *
  * Updated for Confluence 10.2.19 using the Jakarta Servlet API.
  *
- * Security requirement: Apache must remove any client-supplied
- * remote_user header and replace it with the authenticated identity.
+ * Existing authenticated Confluence sessions are prioritized
+ * to preserve compatibility with session-based functionality,
+ * including ScriptRunner user impersonation.
+ *
+ * WARNING: Session-first behavior must be evaluated against
+ * the deployment's SSO security requirements.
  */
 public class RemoteUserAuthenticator extends ConfluenceAuthenticator {
 
@@ -49,25 +52,29 @@ public class RemoteUserAuthenticator extends ConfluenceAuthenticator {
      * @return the authenticated Confluence principal, or null
      *         when authentication cannot be established
      */
+    protected Principal resolveSessionUser(HttpServletRequest request) {
+    return getUserFromSession(request);
+}
     @Override
     public Principal getUser(
             HttpServletRequest request,
             HttpServletResponse response) {
 
-        /*
-         * STEP 1: Retrieve the authenticated username from Apache.
+        // 1. Preserve an existing authenticated Confluence session.
+        Principal sessionUser = resolveSessionUser(request);
+
+        if (sessionUser != null) {
+            log.debug("Using existing authenticated Confluence session");
+            return sessionUser;
+        }
+
+     /* STEP 2: Retrieve the authenticated username from Apache.
          *
          * The header name is retained for compatibility with the
          * existing Kerberos reverse-proxy configuration.
          */
         String remoteUser = request.getHeader("remote_user");
 
-        /*
-         * STEP 2: Reject requests without an authenticated identity.
-         *
-         * An existing HTTP session alone is not sufficient because
-         * Apache is expected to authenticate each protected request.
-         */
         if (remoteUser == null || remoteUser.isBlank()) {
             return null;
         }
@@ -85,19 +92,6 @@ public class RemoteUserAuthenticator extends ConfluenceAuthenticator {
         if (user == null) {
             log.warn("SSO user not found in Confluence directory");
             return null;
-        }
-
-        /*
-         * STEP 4: Check whether an authenticated session already exists.
-         *
-         * Reuse the session only when its identity matches the
-         * username authenticated by Apache.
-         */
-        Principal sessionUser = getUserFromSession(request);
-
-        if (sessionUser != null &&
-                sessionUser.getName().equals(user.getName())) {
-            return sessionUser;
         }
 
         /*
