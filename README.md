@@ -23,6 +23,18 @@ Changes
 
 Note: Authentication and session handling must be validated before production deployment.
 
+Supported Versions
+==================
+| Confluence Version | Git Branch | Serverlet API | Status |
+| :----------------- | :--------- | :------------ | :----- |
+| 9.x and earlier    | support/confluence-9 | javax.servlet | Legacy implementation: version -specific testing required
+| 10.2.19            | support/confluence-10 | jakarta.servlet | Build and unit tests passed: initial QUAL authentication validated
+| Other 10.x Versions| support/confluence-10 | jakarta.servlet | Not independently verified
+
+**Important** Confluence 10 uses Jakarta SErvlet APIs, which are incompatible with the Javax Servlet APIs used by earlier versions. Select the implemnetation corresponding to your Confluence version
+
+
+
 Installation
 ============
 
