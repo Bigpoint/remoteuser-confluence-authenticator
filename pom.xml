@@ -60,12 +60,18 @@
             <version>5.0.7</version>
             <scope>provided</scope>
         </dependency>
-        <!-- Atlassian user interfaces required by Confluence authentication -->
+        <!-- Atlassian User API required by Confluence authentication -->
         <dependency>
             <groupId>com.atlassian.user</groupId>
             <artifactId>atlassian-user</artifactId>
             <version>3.0.3</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.transaction</groupId>
+                    <artifactId>jta</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- Crowd API required by Confluence authentication -->
         <dependency>
