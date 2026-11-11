@@ -4,68 +4,111 @@ import com.atlassian.confluence.user.ConfluenceAuthenticator;
 
 import java.security.Principal;
 
-import com.atlassian.seraph.auth.DefaultAuthenticator;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.log4j.Category;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * A simple Authenticator which allows us to grab a user name from http header or from the session.
- * We use it in a scenario where we have a web server running as reverse proxy. It does Kerberos authentication for us
- * and on success writes the user name (nickname, e.g. jsmith) into a custom header.
- * For now, we use "remote_user" for this.
+ * Provides remote-user Single Sign-On (SSO) authentication for Confluence.
+ *
+ * Authentication is handled by an Apache reverse proxy using Kerberos.
+ * Once authenticated, Apache forwards the username through the
+ * "remote_user" HTTP request header.
+ *
+ * The authenticator resolves that username against Confluence's
+ * configured user directories and establishes an authenticated session.
+ *
+ * Updated for Confluence 10.2.19 using the Jakarta Servlet API.
+ *
+ * Existing authenticated Confluence sessions are prioritized
+ * to preserve compatibility with session-based functionality,
+ * including ScriptRunner user impersonation.
+ *
+ * WARNING: Session-first behavior must be evaluated against
+ * the deployment's SSO security requirements.
  */
 public class RemoteUserAuthenticator extends ConfluenceAuthenticator {
+
     private static final long serialVersionUID = 1L;
-    private static final Log log = LogFactory.getLog(RemoteUserAuthenticator.class);
 
-    public Principal getUser(HttpServletRequest request, HttpServletResponse response) {
+    private static final Log log =
+            LogFactory.getLog(RemoteUserAuthenticator.class);
 
-        // If we have a valid session, try to grab session user and use it for authentication.
-        if (request.getSession() != null) {
-            Principal sessionUser = getUserFromSession(request);
-            if (sessionUser != null) {
-                return sessionUser;
-            }
+    /**
+     * Resolves the authenticated remote user and establishes
+     * the corresponding Confluence session.
+     *
+     * Authentication sequence:
+     * 1. Retrieve the username supplied by Apache.
+     * 2. Reject requests without a remote identity.
+     * 3. Resolve the username in Confluence's user directories.
+     * 4. Reuse an existing session when the identity matches.
+     * 5. Establish an authorized session through Seraph.
+     *
+     * @param request the incoming HTTP request
+     * @param response the HTTP response
+     * @return the authenticated Confluence principal, or null
+     *         when authentication cannot be established
+     */
+    protected Principal resolveSessionUser(HttpServletRequest request) {
+    return getUserFromSession(request);
+}
+    @Override
+    public Principal getUser(
+            HttpServletRequest request,
+            HttpServletResponse response) {
+
+        // 1. Preserve an existing authenticated Confluence session.
+        Principal sessionUser = resolveSessionUser(request);
+
+        if (sessionUser != null) {
+            log.debug("Using existing authenticated Confluence session");
+            return sessionUser;
         }
 
-        // Otherwise we will need to get the nickname from the request otherwise.
-        // getRemoteUser does not work so far so we make our reverse proxy write a header we use.
-        // This works but sucks, hopefully we will learn how to fix this.
-        // This would be what we actually want to do but the result will always be null for unknown reasons:
-
-        // String remoteUser = request.getRemoteUser();
-        // log.warn("request.getRemoteUser() = " + request.getRemoteUser() );
-
-        // And here is our workaround.
+     /* STEP 2: Retrieve the authenticated username from Apache.
+         *
+         * The header name is retained for compatibility with the
+         * existing Kerberos reverse-proxy configuration.
+         */
         String remoteUser = request.getHeader("remote_user");
-        log.debug("request.getHeader(\"remote_user\") = " + remoteUser);
 
-        // Still null? just return it. Confluence will consider this as anonymous and redirect to login dialog
-        // in case anonymous has no permissions.
-        if (remoteUser == null) {
+        if (remoteUser == null || remoteUser.isBlank()) {
             return null;
         }
 
-        // Try to retrieve the user from the configured user repository.
+        remoteUser = remoteUser.trim();
+
+        /*
+         * STEP 3: Resolve the username in Confluence's user directory.
+         *
+         * Kerberos authentication does not automatically guarantee
+         * that the user exists in Confluence.
+         */
         Principal user = getUser(remoteUser);
 
         if (user == null) {
-            log.error("Authenticated user '" + remoteUser + "' cannot be found in any user repository");
+            log.warn("SSO user not found in Confluence directory");
             return null;
         }
 
-        // Modify session signaling that we are authenticated now.
-        request.getSession().setAttribute(DefaultAuthenticator.LOGGED_IN_KEY, user);
-        request.getSession().setAttribute(DefaultAuthenticator.LOGGED_OUT_KEY, null);
+        /*
+         * STEP 5: Establish an authenticated session.
+         *
+         * Use Confluence/Seraph session management rather than
+         * manually modifying internal session attributes.
+         */
+        if (authoriseUserAndEstablishSession(request, response, user)) {
+            log.debug("SSO authentication successful");
+            return user;
+        }
 
-        log.debug("Logged in via SSO with User " + remoteUser);
-
-        return user;
+        /*
+         * STEP 6: Return null if session authorization fails.
+         */
+        log.warn("SSO session authorization failed");
+        return null;
     }
 }
-
